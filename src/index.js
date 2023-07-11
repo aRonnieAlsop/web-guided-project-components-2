@@ -1,3 +1,5 @@
+import axios from "axios";
+
 // 👉 TASK 1- Test out the following endpoints:
 
 //  https://dog.ceo/api/breeds/image/random
@@ -8,12 +10,18 @@
 
 // 👉 TASK 2- Select the "entry point", the element
 // inside of which we'll inject our dog cards 
-const entryPoint = null
+const entryPoint = document.querySelector('.entry');
 
 
 // 👉 TASK 3- `dogCardMaker` takes an object and returns a Dog Card.
 // Use this function to build a Card, and append it to the entry point.
 function dogCardMaker({ imageURL, breed }) {
+
+  
+  /**
+   * const imageURL = obj.imageURL;
+   * const breed = obj.breed;
+   */
   // instantiating the elements
   /*
     <div class="dog-card">
@@ -21,13 +29,23 @@ function dogCardMaker({ imageURL, breed }) {
       <h3>
     </div>
   */
+  const cardDiv = document.createElement('div');
+  const cardImg = document.createElement('img');
+  const heading = document.createElement('h3');
   // set class names, attributes and text
-
+  heading.textContent = `Breed: ${breed}`;
+  cardImg.src = imageURL;
+  cardImg.classList.add("dog-image");
+  cardDiv.classList.add("dog-card");
   // create the hierarchy
-
+  cardDiv.appendChild(heading);
+  cardDiv.appendChild(cardImg);
   // add some interactivity
-
+  cardDiv.addEventListener('click', event => {
+    cardDiv.classList.toggle('selected');
+  })
   // never forget to return!
+  return cardDiv;
 }
 
 
@@ -40,7 +58,29 @@ function dogCardMaker({ imageURL, breed }) {
 //    * ON SUCCESS: use the data to create dogCards and append them to the entry point
 //    * ON FAILURE: log the error to the console
 //    * IN ANY CASE: log "done" to the console
+function getDogs(breed, count) {
+  axios.get(`https://dog.ceo/api/${breed}/image/random/${count}`) //added the count, res will be array now
+  .then(res => {
+    res.data.message.forEach(imageURL => {
+      const dogCard = dogCardMaker({ imageURL: imageURL, breed: "Casey" });
+      entryPoint.appendChild(dogCard);
+    })
+    // console.log(res.data.mesage); // never trust a programmer--check the data with a console log first
+    //console.log(res) showed that we only need data from the data, message part of the data
+    // const dogCard = dogCardMaker({ imageURL: res.data.message, breed: "Casey" })
+    // entryPoint.appendChild(dogCard);
+  })
+  .catch(err => {
+    console.error(err); // logging the error
+  })
+  .finally(() => console.log("DONE!"))
+}
 
+// getDogs(10); //want to get 5 images back
+document.querySelector("button").addEventListener('click', () => {
+  getDogs("mastiff", 3);
+  getDogs("appndzeller", 3);
+})
 
 // 👉 (OPTIONAL) TASK 6- Wrap the fetching operation inside a function `getDogs`
 // that takes a breed and a count (of dogs)
